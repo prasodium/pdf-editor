@@ -220,7 +220,18 @@ function sample(p, el, r) {
     const dist = Math.abs(d[i] - bg[0]) + Math.abs(d[i + 1] - bg[1]) + Math.abs(d[i + 2] - bg[2]);
     if (dist > best) { best = dist; fg = [d[i], d[i + 1], d[i + 2]]; }
   }
-  return { bg, fg: best > 60 ? fg : [0, 0, 0] };
+  // stem thickness (in em) from horizontal ink runs through the middle of the text: ~0.09 regular, ~0.15 bold
+  const lens = [], thr = best * .5, px = r.size * zoom * dpr;
+  for (let y = Math.floor(H * .35); y < H * .65; y++) {
+    let run = 0;
+    for (let x = 2; x < W - 2; x++) {
+      const i = at(x, y), dark = Math.abs(d[i] - bg[0]) + Math.abs(d[i + 1] - bg[1]) + Math.abs(d[i + 2] - bg[2]) > thr;
+      if (dark) run++; else { if (run) lens.push(run); run = 0; }
+    }
+  }
+  lens.sort((a, b) => a - b);
+  const stem = lens.length ? lens[Math.floor(lens.length / 2)] / px : 0;
+  return { bg, fg: best > 60 ? fg : [0, 0, 0], bold: stem > .135 };
 }
 
 /* ---------- in-place text editor ---------- */
@@ -255,10 +266,10 @@ function editRun(p, idx, sheet) {
   const r = p.runs[idx], el = sheet.parentElement;
   let op = p.ops.find(o => o.run === r);
   if (op) return openEditor(p, sheet, { ...op, w: textWidth(op), bg: op.cover.c, op, apply: t => setRunText(p, r, op, t, op.cover, op.color, op.font) });
-  const { bg, fg } = sample(p, el, r);
+  const { bg, fg, bold } = sample(p, el, r);
   const useOrig = $('#font').value === 'orig' && fonts[r.font];
-  const font = useOrig ? { k: 'src', name: r.font } : fontFromUI(null);
-  if (!useOrig && $('#font').value === 'orig') { const f = fonts[r.font]; Object.assign(font, { fam: f?.fam || 'Helvetica', b: f?.b, i: f?.i }); }
+  const f0 = fonts[r.font], font = useOrig ? { k: 'src', name: r.font, fb: { fam: f0.fam, b: f0.b || bold, i: f0.i } } : fontFromUI(null);
+  if (!useOrig && $('#font').value === 'orig') { const f = fonts[r.font]; Object.assign(font, { fam: f?.fam || 'Helvetica', b: f?.b || bold, i: f?.i }); }
   const cover = { x: r.x - .5, y: r.y - r.size * .3, w: r.w + 1, h: r.size * 1.2, c: bg };
   openEditor(p, sheet, { x: r.x, y: r.y, size: r.size, text: r.str, font, color: fg, w: r.w, bg, apply: t => setRunText(p, r, null, t, cover, fg, font) });
 }
@@ -381,7 +392,7 @@ async function save(subset) {
             } catch { fcache.set(key, { font: null, cover: () => false }); }
           }
         }
-        return std(info?.fam || 'Helvetica', info?.b, info?.i);
+        const fb = f.fb || info || {}; return std(fb.fam || 'Helvetica', fb.b, fb.i);
       }
       return std(f.fam, f.b, f.i);
     };
