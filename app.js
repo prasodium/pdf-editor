@@ -710,6 +710,7 @@ function setTool(t) {
     img: 'Click on the page to place the image.',
   };
   $('#hint').textContent = hints[t];
+  $('#mhint').textContent = hints[t];
 }
 
 /* ---------- export ---------- */

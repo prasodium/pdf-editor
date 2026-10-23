@@ -50,6 +50,15 @@ header,
   color: #6a7385;
   margin-left: auto;
 }
+[hidden] {
+  display: none !important;
+}
+.ic {
+  margin-right: 4px;
+}
+#mhint {
+  display: none;
+}
 .logo {
   font-size: 16px;
   margin-right: 8px;
@@ -212,15 +221,6 @@ body.drag::after {
   font-size: 28px;
   z-index: 60;
 }
-@media (max-width: 800px) {
-  .ptools {
-    position: static;
-    transform: none;
-    flex-direction: row;
-    opacity: 1;
-    margin-bottom: 4px;
-  }
-}
 
 /* Options row only matters for text tools */
 .tool-draw #opts,
@@ -239,7 +239,7 @@ body.drag::after {
   touch-action: none;
 }
 
-/* Phones and small tablets */
+/* Phones and small tablets: tools in a bottom bar, within thumb reach */
 @media (max-width: 800px) {
   header,
   #opts {
@@ -248,23 +248,34 @@ body.drag::after {
   }
   header {
     flex-wrap: nowrap;
-    overflow-x: auto; /* tools and actions share one swipeable row */
+    overflow-x: auto;
     scrollbar-width: none;
   }
-  #tools,
+  .logo,
+  .grow,
+  #hint {
+    display: none;
+  }
   #actions {
-    flex: none;
     flex-wrap: nowrap;
+    width: 100%;
+    justify-content: space-between;
   }
-  .grow {
-    flex: none;
-    width: 8px;
-  }
-  #tools button,
   #actions button {
     flex: none;
     min-height: 38px;
+    min-width: 40px;
     white-space: nowrap;
+  }
+  #zin,
+  #zout {
+    display: none; /* pinch to zoom instead */
+  }
+  #save {
+    position: sticky;
+    right: 0;
+    margin-left: auto;
+    box-shadow: -10px 0 8px #fff;
   }
   #opts {
     overflow-x: auto;
@@ -276,22 +287,99 @@ body.drag::after {
     font-size: 16px; /* stops iOS zooming in on focus */
     min-height: 34px;
   }
-  #hint {
-    display: none;
+
+  #tools {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    gap: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    background: #fff;
+    border-top: 1px solid var(--bd);
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+    scrollbar-width: none;
   }
-  .logo {
-    display: none;
+  #tools button {
+    flex: none;
+    width: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    border: 0;
+    background: none;
+    padding: 6px 2px;
+    font-size: 11px;
   }
+  #tools button.on {
+    background: #e4ecff;
+    color: #1c3fa8;
+  }
+  #tools .ic {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+
+  #mhint {
+    display: block;
+    position: fixed;
+    left: 50%;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 25;
+    margin: 0;
+    padding: 6px 12px;
+    max-width: 92vw;
+    border-radius: 16px;
+    background: #1d2330dd;
+    color: #fff;
+    font-size: 13px;
+    text-align: center;
+    pointer-events: none;
+  }
+  #toast {
+    bottom: 130px;
+  }
+
   #pages {
-    padding: 10px 4px 80px;
+    padding: 10px 4px 150px;
     overflow-x: auto;
     align-items: flex-start;
+    gap: 14px;
+  }
+  /* page label on the left, page buttons on the right, one compact row */
+  .pnum {
+    position: static;
+    float: left;
+    line-height: 32px;
+    font-size: 13px;
+  }
+  .ptools {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    opacity: 1;
+    float: right;
+    gap: 4px;
+    margin-bottom: 4px;
   }
   .ptools button {
-    min-width: 40px;
-    min-height: 36px;
+    min-width: 36px;
+    min-height: 32px;
+    padding: 2px 6px;
+  }
+  .sheet {
+    clear: both;
   }
   #welcome h1 {
     font-size: 24px;
   }
+}
+
+#mhint:empty {
+  display: none !important;
 }

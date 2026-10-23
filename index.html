@@ -17,16 +17,26 @@
         <b class="logo">PDF Editor</b>
         <div id="tools" hidden>
           <button data-tool="edit" class="on" title="Click any text to change it">
-            ✏️ Edit text
+            <span class="ic">✏️</span><span class="lb">Edit text</span>
           </button>
           <button data-tool="text" title="Click anywhere to type new text">
-            T Add text
+            <span class="ic">T</span><span class="lb">Add text</span>
           </button>
-          <button data-tool="draw" title="Draw freehand">🖊 Draw</button>
-          <button data-tool="hl" title="Highlight an area">🖍 Highlight</button>
-          <button data-tool="white" title="Cover an area with white">⬜ Whiteout</button>
-          <button data-tool="rect" title="Draw a box">▭ Box</button>
-          <button data-tool="img" title="Click to place an image">🖼 Image</button>
+          <button data-tool="draw" title="Draw freehand">
+            <span class="ic">🖊</span><span class="lb">Draw</span>
+          </button>
+          <button data-tool="hl" title="Highlight an area">
+            <span class="ic">🖍</span><span class="lb">Highlight</span>
+          </button>
+          <button data-tool="white" title="Cover an area with white">
+            <span class="ic">⬜</span><span class="lb">Whiteout</span>
+          </button>
+          <button data-tool="rect" title="Draw a box">
+            <span class="ic">▭</span><span class="lb">Box</span>
+          </button>
+          <button data-tool="img" title="Click to place an image">
+            <span class="ic">🖼</span><span class="lb">Image</span>
+          </button>
         </div>
         <span class="grow"></span>
         <div id="actions" hidden>
@@ -58,6 +68,8 @@
         <span id="hint"></span>
       </div>
     </div>
+
+    <p id="mhint"></p>
 
     <main id="pages"></main>
 
