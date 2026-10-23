@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simple PDF Editor</title>
+<meta name="description" content="Free, private PDF editor in your browser. Edit text in its original font, draw, highlight, add images, reorder pages. Nothing is uploaded.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:,">
+</head>
+<body class="tool-edit">
+
+<header>
+  <b class="logo">PDF Editor</b>
+  <div id="tools" hidden>
+    <button data-tool="edit" class="on" title="Click any text to change it">✏️ Edit text</button>
+    <button data-tool="text" title="Click anywhere to type new text">T Add text</button>
+    <button data-tool="draw" title="Draw freehand">🖊 Draw</button>
+    <button data-tool="hl" title="Highlight an area">🖍 Highlight</button>
+    <button data-tool="white" title="Cover an area with white">⬜ Whiteout</button>
+    <button data-tool="rect" title="Draw a box">▭ Box</button>
+    <button data-tool="img" title="Click to place an image">🖼 Image</button>
+  </div>
+  <span class="grow"></span>
+  <div id="actions" hidden>
+    <button id="undo" title="Undo (Ctrl+Z)">↶</button>
+    <button id="redo" title="Redo (Ctrl+Shift+Z)">↷</button>
+    <button id="zout">−</button><button id="zin">+</button>
+    <button id="add" title="Merge another PDF or image into this one">＋ Add PDF</button>
+    <button id="blank" title="Add a blank page at the end">＋ Blank page</button>
+    <button id="save" class="primary">Download</button>
+  </div>
+</header>
+
+<div id="opts" hidden>
+  <label>Font
+    <select id="font">
+      <option value="orig">Same as original</option>
+      <option value="Helvetica">Sans (Helvetica)</option>
+      <option value="Times">Serif (Times)</option>
+      <option value="Courier">Mono (Courier)</option>
+    </select>
+  </label>
+  <label>Size <input id="size" type="number" min="4" max="200" value="14"></label>
+  <label><input id="bold" type="checkbox"> <b>B</b></label>
+  <label><input id="ital" type="checkbox"> <i>I</i></label>
+  <label>Color <input id="color" type="color" value="#000000"></label>
+  <span id="hint"></span>
+</div>
+
+<main id="pages"></main>
+
+<section id="welcome">
+  <h1>Edit any PDF, right in your browser</h1>
+  <p>Change text in its original font, draw, highlight, add images, and rearrange pages.<br>Your file never leaves your computer.</p>
+  <button id="open" class="primary big">Choose a PDF</button>
+  <p class="small">or drop a file anywhere on this page</p>
+</section>
+
+<div id="toast" hidden></div>
+<input id="file" type="file" accept="application/pdf,image/*" hidden>
+<input id="imgfile" type="file" accept="image/*" hidden>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
