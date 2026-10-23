@@ -28,15 +28,12 @@ header,
   border-bottom: 1px solid var(--bd);
   flex-wrap: wrap;
 }
-header {
+#bar {
   position: sticky;
   top: 0;
   z-index: 20;
 }
 #opts {
-  position: sticky;
-  top: 53px;
-  z-index: 19;
   gap: 14px;
   padding: 6px 14px;
   background: #f8f9fc;
@@ -150,7 +147,7 @@ button:disabled {
   position: relative;
   background: #fff;
   box-shadow: 0 2px 10px #0002;
-  touch-action: none;
+  touch-action: pan-y pinch-zoom; /* let touch scroll the page */
 }
 .sheet canvas {
   position: absolute;
@@ -222,5 +219,79 @@ body.drag::after {
     flex-direction: row;
     opacity: 1;
     margin-bottom: 4px;
+  }
+}
+
+/* Options row only matters for text tools */
+.tool-draw #opts,
+.tool-hl #opts,
+.tool-white #opts,
+.tool-rect #opts,
+.tool-img #opts {
+  display: none;
+}
+
+/* Drawing tools need to own touch gestures */
+.tool-draw .sheet,
+.tool-hl .sheet,
+.tool-white .sheet,
+.tool-rect .sheet {
+  touch-action: none;
+}
+
+/* Phones and small tablets */
+@media (max-width: 800px) {
+  header,
+  #opts {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  header {
+    flex-wrap: nowrap;
+    overflow-x: auto; /* tools and actions share one swipeable row */
+    scrollbar-width: none;
+  }
+  #tools,
+  #actions {
+    flex: none;
+    flex-wrap: nowrap;
+  }
+  .grow {
+    flex: none;
+    width: 8px;
+  }
+  #tools button,
+  #actions button {
+    flex: none;
+    min-height: 38px;
+    white-space: nowrap;
+  }
+  #opts {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+  #opts select,
+  #opts input[type='number'] {
+    font-size: 16px; /* stops iOS zooming in on focus */
+    min-height: 34px;
+  }
+  #hint {
+    display: none;
+  }
+  .logo {
+    display: none;
+  }
+  #pages {
+    padding: 10px 4px 80px;
+    overflow-x: auto;
+    align-items: flex-start;
+  }
+  .ptools button {
+    min-width: 40px;
+    min-height: 36px;
+  }
+  #welcome h1 {
+    font-size: 24px;
   }
 }

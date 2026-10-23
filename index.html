@@ -12,49 +12,51 @@
     <link rel="icon" href="data:," />
   </head>
   <body class="tool-edit">
-    <header>
-      <b class="logo">PDF Editor</b>
-      <div id="tools" hidden>
-        <button data-tool="edit" class="on" title="Click any text to change it">
-          ✏️ Edit text
-        </button>
-        <button data-tool="text" title="Click anywhere to type new text">
-          T Add text
-        </button>
-        <button data-tool="draw" title="Draw freehand">🖊 Draw</button>
-        <button data-tool="hl" title="Highlight an area">🖍 Highlight</button>
-        <button data-tool="white" title="Cover an area with white">⬜ Whiteout</button>
-        <button data-tool="rect" title="Draw a box">▭ Box</button>
-        <button data-tool="img" title="Click to place an image">🖼 Image</button>
-      </div>
-      <span class="grow"></span>
-      <div id="actions" hidden>
-        <button id="undo" title="Undo (Ctrl+Z)">↶</button>
-        <button id="redo" title="Redo (Ctrl+Shift+Z)">↷</button>
-        <button id="zout">−</button><button id="zin">+</button>
-        <button id="add" title="Merge another PDF or image into this one">
-          ＋ Add PDF
-        </button>
-        <button id="blank" title="Add a blank page at the end">＋ Blank page</button>
-        <button id="save" class="primary">Download</button>
-      </div>
-    </header>
+    <div id="bar">
+      <header>
+        <b class="logo">PDF Editor</b>
+        <div id="tools" hidden>
+          <button data-tool="edit" class="on" title="Click any text to change it">
+            ✏️ Edit text
+          </button>
+          <button data-tool="text" title="Click anywhere to type new text">
+            T Add text
+          </button>
+          <button data-tool="draw" title="Draw freehand">🖊 Draw</button>
+          <button data-tool="hl" title="Highlight an area">🖍 Highlight</button>
+          <button data-tool="white" title="Cover an area with white">⬜ Whiteout</button>
+          <button data-tool="rect" title="Draw a box">▭ Box</button>
+          <button data-tool="img" title="Click to place an image">🖼 Image</button>
+        </div>
+        <span class="grow"></span>
+        <div id="actions" hidden>
+          <button id="undo" title="Undo (Ctrl+Z)">↶</button>
+          <button id="redo" title="Redo (Ctrl+Shift+Z)">↷</button>
+          <button id="zout">−</button><button id="zin">+</button>
+          <button id="add" title="Merge another PDF or image into this one">
+            ＋ Add PDF
+          </button>
+          <button id="blank" title="Add a blank page at the end">＋ Blank page</button>
+          <button id="save" class="primary">Download</button>
+        </div>
+      </header>
 
-    <div id="opts" hidden>
-      <label
-        >Font
-        <select id="font">
-          <option value="orig">Same as original</option>
-          <option value="Helvetica">Sans (Helvetica)</option>
-          <option value="Times">Serif (Times)</option>
-          <option value="Courier">Mono (Courier)</option>
-        </select>
-      </label>
-      <label>Size <input id="size" type="number" min="4" max="200" value="14" /></label>
-      <label><input id="bold" type="checkbox" /> <b>B</b></label>
-      <label><input id="ital" type="checkbox" /> <i>I</i></label>
-      <label>Color <input id="color" type="color" value="#000000" /></label>
-      <span id="hint"></span>
+      <div id="opts" hidden>
+        <label
+          >Font
+          <select id="font">
+            <option value="orig">Same as original</option>
+            <option value="Helvetica">Sans (Helvetica)</option>
+            <option value="Times">Serif (Times)</option>
+            <option value="Courier">Mono (Courier)</option>
+          </select>
+        </label>
+        <label>Size <input id="size" type="number" min="4" max="200" value="14" /></label>
+        <label><input id="bold" type="checkbox" /> <b>B</b></label>
+        <label><input id="ital" type="checkbox" /> <i>I</i></label>
+        <label>Color <input id="color" type="color" value="#000000" /></label>
+        <span id="hint"></span>
+      </div>
     </div>
 
     <main id="pages"></main>

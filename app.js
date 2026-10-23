@@ -126,7 +126,10 @@ async function addFile(file) {
   }
   if (fresh) {
     const w = pages[0].view[2] - pages[0].view[0];
-    zoom = Math.max(0.5, Math.min(1.6, (Math.min(innerWidth, 1000) - 80) / w));
+    zoom = Math.max(
+      0.5,
+      Math.min(1.6, (Math.min(innerWidth, 1000) - (innerWidth < 800 ? 16 : 80)) / w),
+    );
     $('#welcome').hidden = true;
     for (const id of ['tools', 'actions', 'opts']) $('#' + id).hidden = false;
     setTool('edit');
