@@ -403,3 +403,11 @@ body.drag::after {
     scroll-behavior: auto !important;
   }
 }
+
+#toast button {
+  margin-left: 8px;
+  padding: 4px 10px;
+  background: #fff;
+  color: #1d2330;
+  border-color: #fff;
+}

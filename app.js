@@ -18,12 +18,32 @@ let pendingImage = null,
   editing = null;
 
 /* ---------- helpers ---------- */
-function toast(msg, ms = 3500) {
+function toast(msg, ms = 3500, action) {
   const t = $('#toast');
   t.textContent = msg;
+  if (action) {
+    const b = document.createElement('button');
+    b.textContent = action.label;
+    b.onclick = action.run;
+    t.append(' ', b);
+  }
   t.hidden = false;
   clearTimeout(toast.t);
   toast.t = setTimeout(() => (t.hidden = true), ms);
+}
+
+// Ask for the real font file (.ttf/.otf) of a PDF font, then save again with it.
+function chooseFontFile(fontName, subset) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.ttf,.otf,font/ttf,font/otf';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    fonts[fontName].override = new Uint8Array(await file.arrayBuffer());
+    save(subset);
+  };
+  input.click();
 }
 const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const css = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
@@ -754,6 +774,7 @@ async function save(subset) {
       fcache = new Map(),
       icache = new Map();
     let warned = false;
+    const missing = new Map(); // font name -> letters its embedded copy lacks
 
     // index mapping: 0 regular, 1 bold, 2 italic, 3 bold-italic
     const std = async (fam, b, i) => {
@@ -766,39 +787,50 @@ async function save(subset) {
       return f;
     };
 
-    const pickFont = async (op) => {
-      const f = op.font;
-      if (f.k === 'src') {
-        const info = fonts[f.name];
-        if (info?.data) {
-          const key = 'src' + f.name;
-          if (fcache.has(key)) {
-            const c = fcache.get(key);
-            if (c.cover(op.text)) return c.font;
-          } else {
-            try {
-              const kit = window.fontkit.create(info.data);
-              const font = await out.embedFont(info.data, { subset: false });
-              const c = {
-                font,
-                noSpace: !kit.hasGlyphForCodePoint(32),
-                cover: (t) =>
-                  [...t].every(
-                    (ch) => /\s/.test(ch) || kit.hasGlyphForCodePoint(ch.codePointAt(0)),
-                  ),
-              };
-              font.noSpace = c.noSpace;
-              fcache.set(key, c);
-              if (c.cover(op.text)) return font;
-            } catch {
-              fcache.set(key, { font: null, cover: () => false });
-            }
+    // A "source" wraps a pdf-lib font with a test for which characters it can draw.
+    const stdSource = async (fam, b, i) => {
+      const font = await std(fam, b, i);
+      return {
+        font,
+        has: (ch) => {
+          try {
+            font.encodeText(ch);
+            return true;
+          } catch {
+            return false;
           }
+        },
+      };
+    };
+
+    const fileSource = async (key, bytes) => {
+      if (!fcache.has(key)) {
+        try {
+          const kit = window.fontkit.create(bytes);
+          fcache.set(key, {
+            font: await out.embedFont(bytes, { subset: true }),
+            has: (ch) => kit.hasGlyphForCodePoint(ch.codePointAt(0)),
+          });
+        } catch {
+          fcache.set(key, null); // unreadable font file
         }
-        const fb = f.fb || info || {};
-        return std(fb.fam || 'Helvetica', fb.b, fb.i);
       }
-      return std(f.fam, f.b, f.i);
+      return fcache.get(key);
+    };
+
+    // Fonts to try for one edit, best match first:
+    // 1. the font file the user uploaded, 2. the font embedded in the PDF,
+    // 3. the closest standard font.
+    const fontChain = async (op) => {
+      const f = op.font;
+      if (f.k !== 'src') return [await stdSource(f.fam, f.b, f.i)];
+      const info = fonts[f.name] || {};
+      const chain = [];
+      if (info.override) chain.push(await fileSource('up' + f.name, info.override));
+      if (info.data) chain.push(await fileSource('src' + f.name, info.data));
+      const fb = f.fb || info;
+      chain.push(await stdSource(fb.fam || 'Helvetica', fb.b, fb.i));
+      return chain.filter(Boolean);
     };
 
     for (const p of list) {
@@ -825,37 +857,40 @@ async function save(subset) {
               color: rgb(...op.cover.c.map((v) => v / 255)),
             });
           if (!op.text) continue;
-          const font = await pickFont(op);
-          let text = op.text;
-          try {
-            font.encodeText(text);
-          } catch {
-            text = [...text]
-              .map((ch) => {
-                try {
-                  font.encodeText(ch);
-                  return ch;
-                } catch {
-                  warned = true;
-                  return '?';
-                }
-              })
-              .join('');
-          }
+          const chain = await fontChain(op);
           const color = rgb(...op.color.map((v) => v / 255));
-          if (!font.noSpace)
-            page.drawText(text, { x: op.x, y: op.y, size: op.size, font, color });
-          else {
-            // subset fonts often lack a space glyph: place words manually
-            let x = op.x;
-            for (const w of text.split(' ')) {
-              if (w) {
-                page.drawText(w, { x, y: op.y, size: op.size, font, color });
-                x += font.widthOfTextAtSize(w, op.size);
-              }
-              x += op.size * 0.28;
+          const info = fonts[op.font.name];
+
+          // Draw each run of characters with the first font that has those glyphs,
+          // so letters the original font contains keep their exact look.
+          let x = op.x,
+            run = '',
+            runFont = null;
+          const flush = () => {
+            if (!run) return;
+            page.drawText(run, { x, y: op.y, size: op.size, font: runFont, color });
+            x += runFont.widthOfTextAtSize(run, op.size);
+            run = '';
+          };
+          for (const ch of op.text) {
+            let src = chain.find((c) => c.has(ch));
+            let drawn = ch;
+            if (!src) {
+              src = chain.at(-1);
+              drawn = '?';
+              warned = true;
+            } else if (src !== chain[0] && info?.data && !/\s/.test(ch)) {
+              // an embedded font was used for this PDF but lacks this letter
+              if (!missing.has(op.font.name)) missing.set(op.font.name, new Set());
+              missing.get(op.font.name).add(ch);
             }
+            if (src.font !== runFont) {
+              flush();
+              runFont = src.font;
+            }
+            run += drawn;
           }
+          flush();
         } else if (op.t === 'rect') {
           page.drawRectangle({
             x: op.x,
@@ -915,11 +950,25 @@ async function save(subset) {
       '.pdf';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    toast(
-      warned
-        ? 'Saved. Some characters are not supported by the original font and became "?".'
-        : 'Saved to your downloads.',
-    );
+    const [lacking] = [...missing].filter(([name]) => !fonts[name].override);
+    if (lacking) {
+      const [name, letters] = lacking;
+      toast(
+        `Saved. The PDF's font "${fonts[name].real.replace(/^[A-Z]{6}\+/, '')}" doesn't ` +
+          `contain: ${[...letters].join(' ')}. Add the font file to keep the exact style.`,
+        30000,
+        {
+          label: 'Choose font file',
+          run: () => chooseFontFile(name, subset),
+        },
+      );
+    } else {
+      toast(
+        warned
+          ? 'Saved. Some characters are not supported by the font and became "?".'
+          : 'Saved to your downloads.',
+      );
+    }
   } catch (e) {
     console.error(e);
     toast('Could not save: ' + e.message);
