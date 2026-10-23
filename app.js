@@ -166,7 +166,8 @@ function layoutRuns(p, el) {
 
 /* ---------- overlay drawing ---------- */
 function fontCss(f, size) {
-  if (f.k === 'src' && fonts[f.name]) return `${size}px ${fonts[f.name].css}`;
+  if (f.k === 'src' && fonts[f.name]?.data) return `${size}px ${fonts[f.name].css}`;
+  if (f.k === 'src') f = { ...(f.fb || fonts[f.name]) }; // not embedded: use the matching standard font
   const fam = f.fam === 'Times' ? '"Times New Roman",Times,serif' : f.fam === 'Courier' ? '"Courier New",monospace' : 'Helvetica,Arial,sans-serif';
   return `${f.i ? 'italic ' : ''}${f.b ? 'bold ' : ''}${size}px ${fam}`;
 }
