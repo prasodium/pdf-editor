@@ -13,9 +13,9 @@
   </head>
   <body class="tool-edit">
     <div id="bar">
-      <header>
+      <header role="toolbar" aria-label="File actions">
         <b class="logo">PDF Editor</b>
-        <div id="tools" hidden>
+        <div id="tools" role="toolbar" aria-label="Editing tools" hidden>
           <button data-tool="edit" class="on" title="Click any text to change it">
             <span class="ic">✏️</span><span class="lb">Edit text</span>
           </button>
@@ -40,18 +40,21 @@
         </div>
         <span class="grow"></span>
         <div id="actions" hidden>
-          <button id="undo" title="Undo (Ctrl+Z)">↶</button>
-          <button id="redo" title="Redo (Ctrl+Shift+Z)">↷</button>
-          <button id="zout">−</button><button id="zin">+</button>
+          <button id="undo" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+          <button id="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
+          <button id="zout" aria-label="Zoom out" title="Zoom out">−</button
+          ><button id="zin" aria-label="Zoom in" title="Zoom in">+</button>
           <button id="add" title="Merge another PDF or image into this one">
-            ＋ Add PDF
+            ＋ <span class="long">Add </span>PDF
           </button>
-          <button id="blank" title="Add a blank page at the end">＋ Blank page</button>
+          <button id="blank" title="Add a blank page at the end">
+            ＋ Blank<span class="long"> page</span>
+          </button>
           <button id="save" class="primary">Download</button>
         </div>
       </header>
 
-      <div id="opts" hidden>
+      <div id="opts" role="group" aria-label="Text options" hidden>
         <label
           >Font
           <select id="font">
@@ -62,16 +65,16 @@
           </select>
         </label>
         <label>Size <input id="size" type="number" min="4" max="200" value="14" /></label>
-        <label><input id="bold" type="checkbox" /> <b>B</b></label>
-        <label><input id="ital" type="checkbox" /> <i>I</i></label>
+        <label><input id="bold" type="checkbox" aria-label="Bold" /> <b>B</b></label>
+        <label><input id="ital" type="checkbox" aria-label="Italic" /> <i>I</i></label>
         <label>Color <input id="color" type="color" value="#000000" /></label>
         <span id="hint"></span>
       </div>
     </div>
 
-    <p id="mhint"></p>
+    <p id="mhint" aria-live="polite"></p>
 
-    <main id="pages"></main>
+    <main id="pages" aria-label="PDF pages"></main>
 
     <section id="welcome">
       <h1>Edit any PDF, right in your browser</h1>
@@ -83,7 +86,7 @@
       <p class="small">or drop a file anywhere on this page</p>
     </section>
 
-    <div id="toast" hidden></div>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
     <input id="file" type="file" accept="application/pdf,image/*" hidden />
     <input id="imgfile" type="file" accept="image/*" hidden />
 

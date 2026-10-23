@@ -195,11 +195,11 @@ function build() {
     el.className = 'page';
     el.dataset.id = p.id;
     el.innerHTML = `<div class="pnum">Page ${i + 1}</div>
-      <div class="ptools">
-        <button data-a="up" title="Move up">↑</button><button data-a="down" title="Move down">↓</button>
-        <button data-a="rl" title="Rotate left">⟲</button><button data-a="rr" title="Rotate right">⟳</button>
-        <button data-a="dup" title="Duplicate">⧉</button><button data-a="del" title="Delete page">🗑</button>
-        <button data-a="ext" title="Download only this page">⇩</button>
+      <div class="ptools" role="group" aria-label="Page ${i + 1} actions">
+        <button data-a="up" aria-label="Move page up" title="Move up">↑</button><button data-a="down" aria-label="Move page down" title="Move down">↓</button>
+        <button data-a="rl" aria-label="Rotate page left" title="Rotate left">⟲</button><button data-a="rr" aria-label="Rotate page right" title="Rotate right">⟳</button>
+        <button data-a="dup" aria-label="Duplicate page" title="Duplicate">⧉</button><button data-a="del" aria-label="Delete page" title="Delete page">🗑</button>
+        <button data-a="ext" aria-label="Download only this page" title="Download only this page">⇩</button>
       </div>
       <div class="sheet" style="width:${vp.width}px;height:${vp.height}px">
         <canvas class="pdf"></canvas><canvas class="ov"></canvas><div class="runs"></div>
@@ -302,6 +302,9 @@ function layoutRuns(p, el) {
     ]);
     const d = document.createElement('div');
     d.className = 'run';
+    d.tabIndex = 0;
+    d.setAttribute('role', 'button');
+    d.setAttribute('aria-label', `Edit text: ${r.str}`);
     Object.assign(d.style, {
       left: Math.min(x1, x2) + 'px',
       top: Math.min(y1, y2) + 'px',
@@ -312,6 +315,12 @@ function layoutRuns(p, el) {
       ev.stopPropagation();
       ev.preventDefault();
       editRun(p, i, el.querySelector('.sheet'));
+    };
+    d.onkeydown = (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        editRun(p, i, el.querySelector('.sheet'));
+      }
     };
     box.append(d);
   });
@@ -461,6 +470,7 @@ function openEditor(p, sheet, s) {
   inp.className = 'editor';
   inp.value = s.text;
   inp.spellcheck = false;
+  inp.setAttribute('aria-label', 'Edit text. Press Enter to apply, Escape to cancel.');
   const px = s.size * zoom;
   inp.style.cssText =
     `left:${vx}px;top:${vy - px * 1.0}px;height:${px * 1.25}px;font:${fontCss(s.font, px)};color:${css(s.color)};transform:rotate(${p.vp.rotation}deg);width:${Math.max(120, (s.w || 0) * zoom + 40)}px;` +
@@ -697,9 +707,10 @@ function setTool(t) {
   closeEditor();
   tool = t;
   document.body.className = 'tool-' + t;
-  document
-    .querySelectorAll('#tools button')
-    .forEach((b) => b.classList.toggle('on', b.dataset.tool === t));
+  document.querySelectorAll('#tools button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.tool === t);
+    b.setAttribute('aria-pressed', b.dataset.tool === t);
+  });
   const hints = {
     edit: 'Click any text to change it. The original font is kept.',
     text: 'Click anywhere on the page to type.',
